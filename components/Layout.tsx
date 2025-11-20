@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAV_LINKS, BRAND_NAME } from '../constants';
 import { Menu, X, Instagram, Facebook, Mail } from 'lucide-react';
+import { Button } from './Button';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -38,14 +39,19 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-brand-dark selection:bg-brand-sage selection:text-brand-dark">
       {/* Navigation */}
       <header 
         className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 ${
-          isTransparent 
+          isTransparent && !isMobileMenuOpen
             ? 'bg-transparent text-white shadow-none opacity-0 -translate-y-12 pointer-events-none' 
-            : 'bg-brand-cream/90 backdrop-blur-md shadow-sm text-brand-dark opacity-100 translate-y-0 pointer-events-auto'
+            : 'bg-brand-cream/95 backdrop-blur-md shadow-sm text-brand-dark opacity-100 translate-y-0 pointer-events-auto'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -82,27 +88,38 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X size={24} className="text-brand-dark" /> : <Menu size={24} />}
+            {isMobileMenuOpen 
+              ? <X size={28} className={`${isTransparent ? 'text-white' : 'text-brand-dark'}`} /> 
+              : <Menu size={28} className={`${isTransparent ? 'text-white' : 'text-brand-dark'}`} />}
           </button>
         </div>
 
-        {/* Mobile Nav Overlay */}
-        <div className={`fixed inset-0 bg-brand-cream flex flex-col justify-center items-center transition-transform duration-500 ease-in-out z-40 pointer-events-auto ${
-          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}>
-          <nav className="flex flex-col space-y-8 text-center">
+      </header>
+
+      {/* Mobile Nav Overlay (outside header to ensure full-screen coverage) */}
+      <div className={`fixed inset-0 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-500 ease-in-out z-[9999] pointer-events-auto bg-brand-cream text-brand-dark backdrop-blur-md md:hidden`}>
+        <div className="flex flex-col min-h-screen w-screen overflow-y-auto">
+          <div className="flex justify-center pt-8">
+            <img src="/images/sweety-lab-logo.png" alt="Sweety Lab" className="h-12 w-auto object-contain filter brightness-0" />
+          </div>
+          <nav className="flex flex-col space-y-10 text-center px-8 flex-1 justify-center items-center">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className="font-serif text-3xl text-brand-dark hover:text-brand-gold transition-colors"
+                className="font-serif text-3xl md:text-4xl uppercase tracking-[0.15em] hover:text-brand-gold transition-colors"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
+          <div className="px-8 pb-10">
+            <Link to="/contatti">
+              <Button variant="primary" fullWidth>Prenota un appuntamento</Button>
+            </Link>
+          </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="flex-grow">
