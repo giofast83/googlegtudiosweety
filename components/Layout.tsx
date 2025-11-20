@@ -12,6 +12,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
+  // Determine if we are on the home page to handle transparency
+  const isHome = location.pathname === '/';
+  
+  // Header is transparent if we are on Home AND at the top
+  const isTransparent = isHome && !isScrolled;
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setIsMobileMenuOpen(false);
@@ -21,7 +27,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show navbar as soon as user scrolls down a bit (e.g., 50px)
       if (window.scrollY > 50) {
         setIsScrolled(true);
       } else {
@@ -37,13 +42,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col font-sans text-brand-dark selection:bg-brand-sage selection:text-brand-dark">
       {/* Navigation */}
       <header 
-        className={`fixed top-0 w-full z-50 transition-all duration-500 bg-brand-cream/90 backdrop-blur-md shadow-sm py-4 transform ${
-          isScrolled ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        className={`fixed top-0 w-full z-50 transition-all duration-500 py-4 ${
+          isTransparent 
+            ? 'bg-transparent text-white shadow-none' 
+            : 'bg-brand-cream/90 backdrop-blur-md shadow-sm text-brand-dark'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <Link to="/" className="z-50 pointer-events-auto">
-            <h1 className="font-serif text-2xl tracking-widest font-bold uppercase text-brand-dark">
+            <h1 className="font-serif text-2xl tracking-widest font-bold uppercase text-inherit transition-colors">
               {BRAND_NAME}
             </h1>
           </Link>
@@ -54,21 +61,25 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-xs uppercase tracking-[0.2em] hover:text-brand-gold transition-colors relative group text-brand-dark"
+                className={`text-xs uppercase tracking-[0.2em] transition-colors relative group ${
+                  isTransparent ? 'hover:text-white/80' : 'hover:text-brand-gold'
+                }`}
               >
                 {link.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-gold transition-all group-hover:w-full"></span>
+                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full ${
+                  isTransparent ? 'bg-white' : 'bg-brand-gold'
+                }`}></span>
               </Link>
             ))}
           </nav>
 
-          {/* Mobile Toggle (Always clickable if visible, but header is hidden so button hides too) */}
+          {/* Mobile Toggle */}
           <button 
-            className="md:hidden z-50 text-brand-dark pointer-events-auto"
+            className="md:hidden z-50 text-inherit pointer-events-auto"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={24} className="text-brand-dark" /> : <Menu size={24} />}
           </button>
         </div>
 
@@ -91,7 +102,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      {/* Removed pt-20 since header is initially hidden/overlay, letting hero hit top */}
       <main className="flex-grow">
         {children}
       </main>

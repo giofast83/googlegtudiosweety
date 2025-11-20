@@ -34,7 +34,7 @@ export const Home: React.FC = () => {
             <Link to="/su-misura">
               <Button 
                 variant="outline" 
-                className="text-white border-white hover:bg-brand-powder hover:text-black hover:border-brand-powder"
+                className="text-white border-white hover:bg-brand-powder !hover:text-black hover:border-brand-powder"
               >
                 Richiedi su Misura
               </Button>
